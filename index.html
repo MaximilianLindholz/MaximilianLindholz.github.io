@@ -3,53 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Homepage</title>
+<title>Chaos Random</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
   
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+  }
   
   html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000;
+    background: #000; 
     font-family: 'Courier Prime', 'Courier New', monospace;
-    position: fixed; /* Prevents "pull to refresh" on mobile */
+    position: fixed; 
+    touch-action: none; /* Prevents mobile scrolling/zooming */
   }
 
   #container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    height: 100svh; /* Standard short viewport height */
-    overflow: hidden;
   }
 
-  #bg-image {
+  canvas {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    top: 0;
+    left: 0;
+    display: block;
     z-index: 1;
-  }
-
-  /* The Glitch/Blur Shapes */
-  .blur-blob {
-    position: absolute;
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-    z-index: 2;
-    pointer-events: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); /* Required for Safari */
-    mix-blend-mode: screen;
-    animation: melt 2s forwards;
-  }
-
-  @keyframes melt {
-    0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; }
   }
 
   #publications-link {
@@ -58,87 +44,95 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-    color: #ff2020;
+    color: #00ff41; 
     text-decoration: none;
-    font-size: clamp(16px, 4vw, 24px);
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
-    white-space: nowrap;
-    padding: 30px; 
-    transition: all 0.15s ease-out;
+    padding: 50px; /* Large hit area */
     cursor: pointer;
+    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
+    user-select: none;
   }
 </style>
 </head>
 <body>
 
 <div id="container">
-  <img id="bg-image" src="your-image-here.jpg" alt="Background">
+  <canvas id="glitch-canvas"></canvas>
   <a href="#" id="publications-link">Publications</a>
 </div>
 
 <script>
+  const canvas = document.getElementById('glitch-canvas');
+  const ctx = canvas.getContext('2d');
   const link = document.getElementById('publications-link');
-  const container = document.getElementById('container');
-  const buffer = 100; 
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-  function moveLink(e) {
+  function drawChaos(x, y) {
+    const iterations = 12; // How many "RANDOM"s drop per touch
+    const colors = ["#00ff41", "#ff00ff", "#00ff41", "#ff00ff", "#ffffff"]; // Green, Pink, Green, Pink, White
+    
+    for (let i = 0; i < iterations; i++) {
+      setTimeout(() => {
+        const fontSize = Math.floor(Math.random() * 30) + 10;
+        ctx.font = `bold ${fontSize}px "Courier Prime"`;
+        
+        // Pick a random color from our mix
+        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Offset the text so it clusters around the touch point
+        const offX = (Math.random() - 0.5) * 180;
+        const offY = (Math.random() - 0.5) * 180;
+        
+        // Draw "RANDOM"
+        ctx.fillText("RANDOM", x + offX, y + offY);
+        
+        // Add random horizontal glitch lines
+        if (Math.random() > 0.7) {
+          ctx.fillRect(x + offX, y + offY, Math.random() * 100, 1);
+        }
+      }, i * 20); // Creates a slight "stutter" timing effect
+    }
+  }
+
+  function handleInteraction(e) {
     const rect = link.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    const linkCenterX = rect.left + rect.width / 2;
-    const linkCenterY = rect.top + rect.height / 2;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    const distanceX = Math.abs(clientX - linkCenterX);
-    const distanceY = Math.abs(clientY - linkCenterY);
+    // If near the button or clicking it
+    if (dist < 120 || e.type === 'touchstart') {
+      drawChaos(clientX, clientY);
 
-    // If mouse/finger is close OR if they actually clicked/tapped it
-    if ((distanceX < buffer && distanceY < buffer) || e.type === 'touchstart' || e.type === 'click') {
-      
-      // 1. Create the weird pink/red blur shapes
-      createBlurBlob(clientX, clientY);
-
-      // 2. Teleport the link
-      const newX = Math.random() * (window.innerWidth - rect.width - 20) + 10;
-      const newY = Math.random() * (window.innerHeight - rect.height - 20) + 10;
+      // Teleport
+      const newX = Math.random() * (window.innerWidth - rect.width - 60) + 30;
+      const newY = Math.random() * (window.innerHeight - rect.height - 60) + 30;
 
       link.style.left = `${newX}px`;
       link.style.top = `${newY}px`;
-      link.style.transform = 'none'; 
+      link.style.transform = 'none';
       
-      // Prevent actual click/navigation
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
     }
   }
 
-  function createBlurBlob(x, y) {
-    const blob = document.createElement('div');
-    blob.className = 'blur-blob';
-    
-    const size = Math.random() * 150 + 50;
-    const colors = ['rgba(255, 0, 80, 0.4)', 'rgba(255, 100, 200, 0.4)', 'rgba(255, 0, 0, 0.3)'];
-    
-    blob.style.width = `${size}px`;
-    blob.style.height = `${size}px`;
-    blob.style.left = `${x - size/2}px`;
-    blob.style.top = `${y - size/2}px`;
-    blob.style.background = colors[Math.floor(Math.random() * colors.length)];
-    
-    container.appendChild(blob);
-    
-    // Cleanup memory
-    setTimeout(() => blob.remove(), 2000);
-  }
+  // Listeners
+  document.addEventListener('mousemove', handleInteraction);
+  link.addEventListener('touchstart', handleInteraction, {passive: false});
+  link.addEventListener('click', (e) => e.preventDefault());
 
-  // Desktop Hover
-  document.addEventListener('mousemove', moveLink);
-  
-  // Mobile Tap/Touch
-  link.addEventListener('touchstart', moveLink, {passive: false});
-  link.addEventListener('click', (e) => e.preventDefault()); // Final safety for desktop clicks
 </script>
-
 </body>
 </html>
