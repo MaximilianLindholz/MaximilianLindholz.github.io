@@ -7,22 +7,22 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
   
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
   html, body {
     width: 100%;
     height: 100%;
-    height: 100dvh;
     overflow: hidden;
     background: #000;
     font-family: 'Courier Prime', 'Courier New', monospace;
+    position: fixed; /* Prevents "pull to refresh" on mobile */
   }
 
   #container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    height: 100dvh;
+    height: 100svh; /* Standard short viewport height */
     overflow: hidden;
   }
 
@@ -32,66 +32,112 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
-    display: block;
+    z-index: 1;
+  }
+
+  /* The Glitch/Blur Shapes */
+  .blur-blob {
+    position: absolute;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    z-index: 2;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Required for Safari */
+    mix-blend-mode: screen;
+    animation: melt 2s forwards;
+  }
+
+  @keyframes melt {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
   }
 
   #publications-link {
     position: absolute;
-    /* Initial Position */
-    top: 10%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
-    z-index: 10;
+    z-index: 100;
     color: #ff2020;
     text-decoration: none;
-    font-size: clamp(14px, 2.5vw, 22px);
+    font-size: clamp(16px, 4vw, 24px);
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
     white-space: nowrap;
-    
-    /* Smooth movement transition */
-    transition: all 0.1s ease-out;
-    padding: 20px; /* Larger hit area for the script to detect */
+    padding: 30px; 
+    transition: all 0.15s ease-out;
+    cursor: pointer;
   }
 </style>
 </head>
 <body>
 
 <div id="container">
-  <img id="bg-image" src="your-image-source.jpg">
+  <img id="bg-image" src="your-image-here.jpg" alt="Background">
   <a href="#" id="publications-link">Publications</a>
 </div>
 
 <script>
   const link = document.getElementById('publications-link');
-  const buffer = 100; // How close the mouse gets before the link moves (in pixels)
+  const container = document.getElementById('container');
+  const buffer = 100; 
 
-  document.addEventListener('mousemove', (e) => {
+  function moveLink(e) {
     const rect = link.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    // Calculate center of the link
     const linkCenterX = rect.left + rect.width / 2;
     const linkCenterY = rect.top + rect.height / 2;
 
-    // Calculate distance between mouse and center of link
-    const distanceX = Math.abs(e.clientX - linkCenterX);
-    const distanceY = Math.abs(e.clientY - linkCenterY);
+    const distanceX = Math.abs(clientX - linkCenterX);
+    const distanceY = Math.abs(clientY - linkCenterY);
 
-    // If mouse is within the buffer zone
-    if (distanceX < buffer && distanceY < buffer) {
-      // Generate random new coordinates within the screen bounds
-      const newX = Math.random() * (window.innerWidth - rect.width);
-      const newY = Math.random() * (window.innerHeight - rect.height);
+    // If mouse/finger is close OR if they actually clicked/tapped it
+    if ((distanceX < buffer && distanceY < buffer) || e.type === 'touchstart' || e.type === 'click') {
+      
+      // 1. Create the weird pink/red blur shapes
+      createBlurBlob(clientX, clientY);
 
-      // Apply new position
+      // 2. Teleport the link
+      const newX = Math.random() * (window.innerWidth - rect.width - 20) + 10;
+      const newY = Math.random() * (window.innerHeight - rect.height - 20) + 10;
+
       link.style.left = `${newX}px`;
       link.style.top = `${newY}px`;
-      link.style.transform = 'none'; // Remove the initial translate(-50%)
+      link.style.transform = 'none'; 
+      
+      // Prevent actual click/navigation
+      e.preventDefault();
     }
-  });
+  }
+
+  function createBlurBlob(x, y) {
+    const blob = document.createElement('div');
+    blob.className = 'blur-blob';
+    
+    const size = Math.random() * 150 + 50;
+    const colors = ['rgba(255, 0, 80, 0.4)', 'rgba(255, 100, 200, 0.4)', 'rgba(255, 0, 0, 0.3)'];
+    
+    blob.style.width = `${size}px`;
+    blob.style.height = `${size}px`;
+    blob.style.left = `${x - size/2}px`;
+    blob.style.top = `${y - size/2}px`;
+    blob.style.background = colors[Math.floor(Math.random() * colors.length)];
+    
+    container.appendChild(blob);
+    
+    // Cleanup memory
+    setTimeout(() => blob.remove(), 2000);
+  }
+
+  // Desktop Hover
+  document.addEventListener('mousemove', moveLink);
+  
+  // Mobile Tap/Touch
+  link.addEventListener('touchstart', moveLink, {passive: false});
+  link.addEventListener('click', (e) => e.preventDefault()); // Final safety for desktop clicks
 </script>
 
 </body>
