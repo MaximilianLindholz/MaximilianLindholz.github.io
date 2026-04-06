@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SARDINE_OS_V1</title>
+<title>SARDINE_OS_FINAL</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
   
@@ -15,7 +15,7 @@
   
   html, body {
     width: 100%; height: 100%; overflow: hidden;
-    background: #0000AA; /* TempleOS Blue */
+    background: #000; /* Pure Black for the final reveal */
     font-family: 'VT323', monospace;
     position: fixed; touch-action: none;
   }
@@ -23,19 +23,25 @@
   #container { 
     position: relative; 
     width: 100vw; height: 100vh; 
-    border: 10px solid #55FFFF; /* Cyan Border */
+    /* Initial state: TempleOS Cyan/Black border */
+    border: 10px solid #55FFFF; 
     outline: 4px solid #000;
     outline-offset: -10px;
+    transition: border-color 0.5s steps(2); /* Jumpy fade for border */
   }
 
-  #bg-reveal {
+  /* The small, centered white butt logo reveal */
+  #butt-logo-reveal {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 1;
+    color: #FFFFFF; /* White */
+    font-size: 60px; /* Small, focused size */
     opacity: 0;
-    transition: opacity 0.6s steps(4); 
+    transition: opacity 1s steps(5); /* Retro "flicker" fade-in */
+    user-select: none;
+    white-space: nowrap;
   }
 
   canvas {
@@ -43,6 +49,7 @@
     top: 0; left: 0;
     z-index: 2;
     pointer-events: none;
+    transition: opacity 0.5s steps(3);
   }
 
   #click-me {
@@ -70,12 +77,14 @@
   }
 
   .hidden { display: none !important; }
+  .revealed { opacity: 1 !important; }
 </style>
 </head>
 <body>
 
 <div id="container">
-  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Final Reveal">
+  <div id="butt-logo-reveal">( )( )</div>
+  
   <canvas id="glitch-canvas"></canvas>
   <a href="#" id="click-me">CLICK ME</a>
 </div>
@@ -83,25 +92,29 @@
 <script>
   const canvas = document.getElementById('glitch-canvas');
   const ctx = canvas.getContext('2d');
+  const container = document.getElementById('container');
   const link = document.getElementById('click-me');
-  const bg = document.getElementById('bg-reveal');
+  const logo = document.getElementById('butt-logo-reveal');
   
   const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#FF55FF", "#55FFFF"];
   
-  // Iconography: Sardines (with butt)
+  // Iconography: Sardines (including the requests) and OS bits
   const icons = [
     "<'(((>< ( )", // Butt Sardine
     " ><(((º> ( )", // Flipped Butt Sardine
     " <*)))><",
-    " []",
+    " [BUTT]",
     " >S/R_D<",
     " ─O))><",
     " O::::O"
   ];
 
+  let isRevealed = false;
+
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    // Fill initial canvas with TempleOS Blue
     ctx.fillStyle = "#0000AA";
     ctx.fillRect(0,0, canvas.width, canvas.height);
   }
@@ -109,7 +122,10 @@
   resize();
 
   function spawnChaos(x, y) {
-    const isRare = Math.random() < 0.02; // 2% chance for the rare text
+    if (isRevealed) return;
+
+    // 2% chance for the rare text phrase
+    const isRare = Math.random() < 0.02; 
     
     if (isRare) {
         ctx.font = "bold 34px 'VT323'";
@@ -127,8 +143,9 @@
             ctx.fillStyle = color;
             ctx.fillText(icon, x + offX, y + offY);
             
-            // Draw a blocky 16-color rectangle glitch
+            // Draw a blocky CGA rectangle glitch
             if (Math.random() > 0.7) {
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
                 ctx.fillRect(x + offX, y + offY + 10, Math.random() * 60, 5);
             }
         }
@@ -136,6 +153,8 @@
   }
 
   function handleInteraction(e) {
+    if (isRevealed) return;
+
     const rect = link.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -144,20 +163,18 @@
     const centerY = rect.top + rect.height / 2;
     const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    // 12% chance the button stays still and becomes yellow/catchable
-    const isLucky = Math.random() > 0.88;
+    // 15% chance 
+    const isLucky = Math.random() > 0.85;
 
     if (dist < 130) {
       if (!isLucky && !link.classList.contains('catchable')) {
+        // Runaway button mode
         spawnChaos(clientX, clientY);
-        
         const newX = Math.random() * (window.innerWidth - rect.width - 120) + 60;
         const newY = Math.random() * (window.innerHeight - rect.height - 120) + 60;
-        
         link.style.left = `${newX}px`;
         link.style.top = `${newY}px`;
         link.style.transform = 'none';
-        
         if (e.cancelable) e.preventDefault();
       } else {
         // Button stopped! It's now catchable.
@@ -166,19 +183,25 @@
     }
   }
 
-  function reveal(e) {
+  function revealButtLogo(e) {
     e.preventDefault();
     if (link.classList.contains('catchable')) {
-      canvas.style.display = 'none';
-      link.classList.add('hidden');
-      bg.style.opacity = '1';
+      isRevealed = true;
+      
+      // 1. Hide the Chaos/UI
+      canvas.style.opacity = '0'; // Chaos fades out
+      link.classList.add('hidden'); // Button vanishes
+      container.style.borderColor = 'transparent'; // Outer cyan frame disappears
+
+      // 2. Show the White Butt Logo on Black
+      logo.classList.add('revealed');
     }
   }
 
   // Input Listeners
   document.addEventListener('mousemove', handleInteraction);
   link.addEventListener('touchstart', handleInteraction, {passive: false});
-  link.addEventListener('click', reveal);
+  link.addEventListener('click', revealButtLogo);
 </script>
 </body>
 </html>
