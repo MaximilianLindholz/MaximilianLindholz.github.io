@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SARDINE_OS</title>
+<title>SARDINE_OS_V1</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
   
@@ -22,10 +22,9 @@
 
   #container { 
     position: relative; 
-    width: 100vw; 
-    height: 100vh; 
-    border: 10px solid #55FFFF; 
-    outline: 5px solid #000;
+    width: 100vw; height: 100vh; 
+    border: 10px solid #55FFFF; /* Cyan Border */
+    outline: 4px solid #000;
     outline-offset: -10px;
   }
 
@@ -36,7 +35,7 @@
     object-fit: cover;
     z-index: 1;
     opacity: 0;
-    transition: opacity 0.5s steps(3); 
+    transition: opacity 0.6s steps(4); 
   }
 
   canvas {
@@ -57,15 +56,17 @@
     border-color: #FFFFFF #555555 #555555 #FFFFFF;
     text-decoration: none;
     font-size: 28px;
-    padding: 10px 20px; 
+    padding: 12px 20px; 
     cursor: pointer;
     user-select: none;
     box-shadow: 6px 6px 0px #000;
   }
 
+  /* The "Catchable" State - TempleOS Highlight Yellow */
   .catchable {
     background: #FFFF55 !important;
-    color: #FF5555 !important;
+    border-color: #000 !important;
+    color: #AA0000 !important;
   }
 
   .hidden { display: none !important; }
@@ -74,7 +75,7 @@
 <body>
 
 <div id="container">
-  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Reveal">
+  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Final Reveal">
   <canvas id="glitch-canvas"></canvas>
   <a href="#" id="click-me">CLICK ME</a>
 </div>
@@ -85,15 +86,17 @@
   const link = document.getElementById('click-me');
   const bg = document.getElementById('bg-reveal');
   
-  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#AAAAAA", "#55FFFF"];
+  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#FF55FF", "#55FFFF"];
   
-  // Low-poly ASCII Sardine Variations
-  const sardines = [
-    "<'(((><", 
-    " <º))))><", 
-    "  ><(((º>", 
-    " ───O))><",
-    " <*)))><"
+  // Iconography: Sardines (with butt)
+  const icons = [
+    "<'(((>< ( )", // Butt Sardine
+    " ><(((º> ( )", // Flipped Butt Sardine
+    " <*)))><",
+    " []",
+    " >S/R_D<",
+    " ─O))><",
+    " O::::O"
   ];
 
   function resize() {
@@ -105,27 +108,30 @@
   window.addEventListener('resize', resize);
   resize();
 
-  function spawnSardine(x, y) {
-    const amount = 5; 
-    for (let i = 0; i < amount; i++) {
-      // Pick a random sardine shape and color
-      const fish = sardines[Math.floor(Math.random() * sardines.length)];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      
-      const offX = (Math.random() - 0.5) * 150;
-      const offY = (Math.random() - 0.5) * 150;
-      
-      ctx.font = `${Math.floor(Math.random() * 10 + 20)}px 'VT323'`;
-      ctx.fillStyle = color;
-      
-      // Draw the sardine
-      ctx.fillText(fish, x + offX, y + offY);
-      
-      // Rare Terry Davis Shoutout (1 in 30 fish)
-      if (Math.random() < 0.03) {
+  function spawnChaos(x, y) {
+    const isRare = Math.random() < 0.02; // 2% chance for the rare text
+    
+    if (isRare) {
+        ctx.font = "bold 34px 'VT323'";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("TERRY DAVIS", x + offX, y + offY - 20);
-      }
+        ctx.fillText("well this sucks...", x - 50, y);
+    } else {
+        // Drop 6 random icons/sardines per interaction
+        for (let i = 0; i < 6; i++) {
+            const icon = icons[Math.floor(Math.random() * icons.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const offX = (Math.random() - 0.5) * 200;
+            const offY = (Math.random() - 0.5) * 200;
+            
+            ctx.font = `${Math.floor(Math.random() * 10 + 22)}px 'VT323'`;
+            ctx.fillStyle = color;
+            ctx.fillText(icon, x + offX, y + offY);
+            
+            // Draw a blocky 16-color rectangle glitch
+            if (Math.random() > 0.7) {
+                ctx.fillRect(x + offX, y + offY + 10, Math.random() * 60, 5);
+            }
+        }
     }
   }
 
@@ -138,15 +144,15 @@
     const centerY = rect.top + rect.height / 2;
     const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    const isLucky = Math.random() > 0.88; // ~12% chance to be catchable
+    // 12% chance the button stays still and becomes yellow/catchable
+    const isLucky = Math.random() > 0.88;
 
-    if (dist < 120) {
-      if (!isLucky) {
-        link.classList.remove('catchable');
-        spawnSardine(clientX, clientY);
+    if (dist < 130) {
+      if (!isLucky && !link.classList.contains('catchable')) {
+        spawnChaos(clientX, clientY);
         
-        const newX = Math.random() * (window.innerWidth - rect.width - 100) + 50;
-        const newY = Math.random() * (window.innerHeight - rect.height - 100) + 50;
+        const newX = Math.random() * (window.innerWidth - rect.width - 120) + 60;
+        const newY = Math.random() * (window.innerHeight - rect.height - 120) + 60;
         
         link.style.left = `${newX}px`;
         link.style.top = `${newY}px`;
@@ -154,6 +160,7 @@
         
         if (e.cancelable) e.preventDefault();
       } else {
+        // Button stopped! It's now catchable.
         link.classList.add('catchable');
       }
     }
@@ -168,6 +175,7 @@
     }
   }
 
+  // Input Listeners
   document.addEventListener('mousemove', handleInteraction);
   link.addEventListener('touchstart', handleInteraction, {passive: false});
   link.addEventListener('click', reveal);
