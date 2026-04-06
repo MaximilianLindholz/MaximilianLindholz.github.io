@@ -3,103 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Chaos Random</title>
+<title>TempleOS_Tribute</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
   
   * { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
+    margin: 0; padding: 0; box-sizing: border-box; 
     -webkit-tap-highlight-color: transparent; 
+    image-rendering: pixelated; 
   }
   
   html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000; 
-    font-family: 'Courier Prime', 'Courier New', monospace;
-    position: fixed; 
-    touch-action: none; /* Prevents mobile scrolling/zooming */
+    width: 100%; height: 100%; overflow: hidden;
+    background: #0000AA; /* Classic TempleOS Blue */
+    font-family: 'VT323', monospace;
+    position: fixed; touch-action: none;
   }
 
-  #container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+  #container { 
+    position: relative; 
+    width: 100vw; 
+    height: 100vh; 
+    border: 10px solid #55FFFF; /* Cyan border */
+    outline: 5px solid #000;
+    outline-offset: -10px;
+  }
+
+  #bg-reveal {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.8s steps(5); 
   }
 
   canvas {
     position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    z-index: 1;
+    top: 0; left: 0;
+    z-index: 2;
+    pointer-events: none;
   }
 
-  #publications-link {
+  #click-me {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-    color: #00ff41; 
+    color: #000; 
+    background: #AAAAAA; 
+    border: 4px solid;
+    border-color: #FFFFFF #555555 #555555 #FFFFFF;
     text-decoration: none;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 0.5em;
-    text-transform: uppercase;
-    padding: 50px; /* Large hit area */
+    font-size: 32px;
+    padding: 12px 24px; 
     cursor: pointer;
-    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
     user-select: none;
+    box-shadow: 6px 6px 0px #000;
+    text-transform: uppercase;
   }
+
+  /* When the button "stops" running away */
+  .catchable {
+    background: #FFFF55 !important; /* Yellow */
+    border-color: #000 !important;
+  }
+
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
 
 <div id="container">
+  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Final Reveal">
   <canvas id="glitch-canvas"></canvas>
-  <a href="#" id="publications-link">Publications</a>
+  <a href="#" id="click-me">CLICK ME</a>
 </div>
 
 <script>
   const canvas = document.getElementById('glitch-canvas');
   const ctx = canvas.getContext('2d');
-  const link = document.getElementById('publications-link');
+  const link = document.getElementById('click-me');
+  const bg = document.getElementById('bg-reveal');
   
+  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#5555FF", "#FF55FF", "#55FFFF"];
+  const rareShoutouts = ["TERRY DAVIS", "GOD'S PROGRAMMER", "TEMPLE OS", "CIA GLOWS", "DIVINE INTELLECT"];
+
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    ctx.fillStyle = "#0000AA";
+    ctx.fillRect(0,0, canvas.width, canvas.height);
   }
   window.addEventListener('resize', resize);
   resize();
 
   function drawChaos(x, y) {
-    const iterations = 12; // How many "RANDOM"s drop per touch
-    const colors = ["#00ff41", "#ff00ff", "#00ff41", "#ff00ff", "#ffffff"]; // Green, Pink, Green, Pink, White
-    
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 0; i < 10; i++) {
       setTimeout(() => {
-        const fontSize = Math.floor(Math.random() * 30) + 10;
-        ctx.font = `bold ${fontSize}px "Courier Prime"`;
+        // 1 in 50 chance for a Terry Davis shoutout
+        const isRare = Math.random() < 0.02; 
         
-        // Pick a random color from our mix
-        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+        ctx.font = isRare ? "bold 30px 'VT323'" : "24px 'VT323'";
+        ctx.fillStyle = isRare ? "#FFFFFF" : colors[Math.floor(Math.random() * colors.length)];
         
-        // Offset the text so it clusters around the touch point
-        const offX = (Math.random() - 0.5) * 180;
-        const offY = (Math.random() - 0.5) * 180;
+        const text = isRare 
+          ? rareShoutouts[Math.floor(Math.random() * rareShoutouts.length)] 
+          : "RANDOM";
         
-        // Draw "RANDOM"
-        ctx.fillText("RANDOM", x + offX, y + offY);
+        const offX = (Math.random() - 0.5) * 220;
+        const offY = (Math.random() - 0.5) * 220;
         
-        // Add random horizontal glitch lines
-        if (Math.random() > 0.7) {
-          ctx.fillRect(x + offX, y + offY, Math.random() * 100, 1);
+        ctx.fillText(text, x + offX, y + offY);
+        
+        // Draw some random system-style rectangles
+        if (Math.random() > 0.6) {
+          ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+          ctx.fillRect(x + offX, y + offY + 5, Math.random() * 80, 4);
         }
-      }, i * 20); // Creates a slight "stutter" timing effect
+      }, i * 35);
     }
   }
 
@@ -112,27 +135,39 @@
     const centerY = rect.top + rect.height / 2;
     const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    // If near the button or clicking it
-    if (dist < 120 || e.type === 'touchstart') {
-      drawChaos(clientX, clientY);
+    // 15% chance to stay put
+    const isLucky = Math.random() > 0.85;
 
-      // Teleport
-      const newX = Math.random() * (window.innerWidth - rect.width - 60) + 30;
-      const newY = Math.random() * (window.innerHeight - rect.height - 60) + 30;
-
-      link.style.left = `${newX}px`;
-      link.style.top = `${newY}px`;
-      link.style.transform = 'none';
-      
-      if (e.cancelable) e.preventDefault();
+    if (dist < 130) {
+      if (!isLucky) {
+        link.classList.remove('catchable');
+        drawChaos(clientX, clientY);
+        const newX = Math.random() * (window.innerWidth - rect.width - 100) + 50;
+        const newY = Math.random() * (window.innerHeight - rect.height - 100) + 50;
+        link.style.left = `${newX}px`;
+        link.style.top = `${newY}px`;
+        link.style.transform = 'none';
+        if (e.cancelable) e.preventDefault();
+      } else {
+        // The button "gives up" - visual cue for the user
+        link.classList.add('catchable');
+      }
     }
   }
 
-  // Listeners
+  function revealBackground(e) {
+    e.preventDefault();
+    // Only allow reveal if the button is currently "catchable"
+    if (link.classList.contains('catchable')) {
+      canvas.style.display = 'none';
+      link.classList.add('hidden');
+      bg.style.opacity = '1';
+    }
+  }
+
   document.addEventListener('mousemove', handleInteraction);
   link.addEventListener('touchstart', handleInteraction, {passive: false});
-  link.addEventListener('click', (e) => e.preventDefault());
-
+  link.addEventListener('click', revealBackground);
 </script>
 </body>
 </html>
