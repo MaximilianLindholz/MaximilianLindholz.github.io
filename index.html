@@ -3,45 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SARDINE_OS_FINAL</title>
+<title>VOID</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
   
   * { 
     margin: 0; padding: 0; box-sizing: border-box; 
     -webkit-tap-highlight-color: transparent; 
-    image-rendering: pixelated; 
   }
   
   html, body {
     width: 100%; height: 100%; overflow: hidden;
-    background: #000; /* Pure Black for the final reveal */
-    font-family: 'VT323', monospace;
+    background: #000; /* Solid Black */
+    font-family: 'Courier Prime', monospace;
     position: fixed; touch-action: none;
   }
 
   #container { 
     position: relative; 
     width: 100vw; height: 100vh; 
-    /* Initial state: TempleOS Cyan/Black border */
-    border: 10px solid #55FFFF; 
-    outline: 4px solid #000;
-    outline-offset: -10px;
-    transition: border-color 0.5s steps(2); /* Jumpy fade for border */
   }
 
-  /* The small, centered white butt logo reveal */
   #butt-logo-reveal {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
-    color: #FFFFFF; /* White */
-    font-size: 60px; /* Small, focused size */
+    color: #FFFFFF;
+    font-size: 50px;
     opacity: 0;
-    transition: opacity 1s steps(5); /* Retro "flicker" fade-in */
+    transition: opacity 0.5s ease-in;
     user-select: none;
-    white-space: nowrap;
   }
 
   canvas {
@@ -49,7 +41,6 @@
     top: 0; left: 0;
     z-index: 2;
     pointer-events: none;
-    transition: opacity 0.5s steps(3);
   }
 
   #click-me {
@@ -57,23 +48,22 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-    color: #000; 
-    background: #AAAAAA; 
-    border: 4px solid;
-    border-color: #FFFFFF #555555 #555555 #FFFFFF;
+    color: #fff; 
+    background: transparent; 
+    border: 1px solid #fff;
     text-decoration: none;
-    font-size: 28px;
-    padding: 12px 20px; 
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 15px 25px; 
     cursor: pointer;
     user-select: none;
-    box-shadow: 6px 6px 0px #000;
+    transition: background 0.2s;
   }
 
-  /* The "Catchable" State - TempleOS Highlight Yellow */
+  /* When the button "stops" and becomes clickable */
   .catchable {
-    background: #FFFF55 !important;
-    border-color: #000 !important;
-    color: #AA0000 !important;
+    background: #fff !important;
+    color: #000 !important;
   }
 
   .hidden { display: none !important; }
@@ -84,7 +74,6 @@
 
 <div id="container">
   <div id="butt-logo-reveal">( )( )</div>
-  
   <canvas id="glitch-canvas"></canvas>
   <a href="#" id="click-me">CLICK ME</a>
 </div>
@@ -92,20 +81,18 @@
 <script>
   const canvas = document.getElementById('glitch-canvas');
   const ctx = canvas.getContext('2d');
-  const container = document.getElementById('container');
   const link = document.getElementById('click-me');
   const logo = document.getElementById('butt-logo-reveal');
   
-  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#FF55FF", "#55FFFF"];
+  // High contrast glitch colors
+  const colors = ["#00ff41", "#ff00ff", "#ffffff", "#00ffff"];
   
-  // Iconography: Sardines (including the requests) and OS bits
   const icons = [
-    "<'(((>< ( )", // Butt Sardine
-    " ><(((º> ( )", // Flipped Butt Sardine
+    "<'(((>< ( )", 
+    " ><(((º> ( )", 
     " <*)))><",
     " [BUTT]",
     " >S/R_D<",
-    " ─O))><",
     " O::::O"
   ];
 
@@ -114,9 +101,7 @@
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    // Fill initial canvas with TempleOS Blue
-    ctx.fillStyle = "#0000AA";
-    ctx.fillRect(0,0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -124,29 +109,24 @@
   function spawnChaos(x, y) {
     if (isRevealed) return;
 
-    // 2% chance for the rare text phrase
-    const isRare = Math.random() < 0.02; 
-    
-    if (isRare) {
-        ctx.font = "bold 34px 'VT323'";
+    if (Math.random() < 0.02) {
+        ctx.font = "bold 24px 'Courier Prime'";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("well this sucks...", x - 50, y);
+        ctx.fillText("well this sucks...", x - 60, y);
     } else {
-        // Drop 6 random icons/sardines per interaction
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 5; i++) {
             const icon = icons[Math.floor(Math.random() * icons.length)];
             const color = colors[Math.floor(Math.random() * colors.length)];
-            const offX = (Math.random() - 0.5) * 200;
-            const offY = (Math.random() - 0.5) * 200;
+            const offX = (Math.random() - 0.5) * 180;
+            const offY = (Math.random() - 0.5) * 180;
             
-            ctx.font = `${Math.floor(Math.random() * 10 + 22)}px 'VT323'`;
+            ctx.font = `${Math.floor(Math.random() * 8 + 18)}px 'Courier Prime'`;
             ctx.fillStyle = color;
             ctx.fillText(icon, x + offX, y + offY);
             
-            // Draw a blocky CGA rectangle glitch
-            if (Math.random() > 0.7) {
-                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                ctx.fillRect(x + offX, y + offY + 10, Math.random() * 60, 5);
+            if (Math.random() > 0.8) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x + offX, y + offY + 5, Math.random() * 40, 1);
             }
         }
     }
@@ -163,45 +143,37 @@
     const centerY = rect.top + rect.height / 2;
     const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    // 15% chance 
+    // 15% chance to be catchable
     const isLucky = Math.random() > 0.85;
 
-    if (dist < 130) {
+    if (dist < 100) {
       if (!isLucky && !link.classList.contains('catchable')) {
-        // Runaway button mode
         spawnChaos(clientX, clientY);
-        const newX = Math.random() * (window.innerWidth - rect.width - 120) + 60;
-        const newY = Math.random() * (window.innerHeight - rect.height - 120) + 60;
+        const newX = Math.random() * (window.innerWidth - rect.width - 60) + 30;
+        const newY = Math.random() * (window.innerHeight - rect.height - 60) + 30;
         link.style.left = `${newX}px`;
         link.style.top = `${newY}px`;
         link.style.transform = 'none';
         if (e.cancelable) e.preventDefault();
       } else {
-        // Button stopped! It's now catchable.
         link.classList.add('catchable');
       }
     }
   }
 
-  function revealButtLogo(e) {
+  function revealFinal(e) {
     e.preventDefault();
     if (link.classList.contains('catchable')) {
       isRevealed = true;
-      
-      // 1. Hide the Chaos/UI
-      canvas.style.opacity = '0'; // Chaos fades out
-      link.classList.add('hidden'); // Button vanishes
-      container.style.borderColor = 'transparent'; // Outer cyan frame disappears
-
-      // 2. Show the White Butt Logo on Black
+      canvas.style.opacity = '0';
+      link.classList.add('hidden');
       logo.classList.add('revealed');
     }
   }
 
-  // Input Listeners
   document.addEventListener('mousemove', handleInteraction);
   link.addEventListener('touchstart', handleInteraction, {passive: false});
-  link.addEventListener('click', revealButtLogo);
+  link.addEventListener('click', revealFinal);
 </script>
 </body>
 </html>
