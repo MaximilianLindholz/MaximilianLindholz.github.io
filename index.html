@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TempleOS_Tribute</title>
+<title>SARDINE_OS</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
   
@@ -15,7 +15,7 @@
   
   html, body {
     width: 100%; height: 100%; overflow: hidden;
-    background: #0000AA; /* Classic TempleOS Blue */
+    background: #0000AA; /* TempleOS Blue */
     font-family: 'VT323', monospace;
     position: fixed; touch-action: none;
   }
@@ -24,7 +24,7 @@
     position: relative; 
     width: 100vw; 
     height: 100vh; 
-    border: 10px solid #55FFFF; /* Cyan border */
+    border: 10px solid #55FFFF; 
     outline: 5px solid #000;
     outline-offset: -10px;
   }
@@ -36,7 +36,7 @@
     object-fit: cover;
     z-index: 1;
     opacity: 0;
-    transition: opacity 0.8s steps(5); 
+    transition: opacity 0.5s steps(3); 
   }
 
   canvas {
@@ -56,18 +56,16 @@
     border: 4px solid;
     border-color: #FFFFFF #555555 #555555 #FFFFFF;
     text-decoration: none;
-    font-size: 32px;
-    padding: 12px 24px; 
+    font-size: 28px;
+    padding: 10px 20px; 
     cursor: pointer;
     user-select: none;
     box-shadow: 6px 6px 0px #000;
-    text-transform: uppercase;
   }
 
-  /* When the button "stops" running away */
   .catchable {
-    background: #FFFF55 !important; /* Yellow */
-    border-color: #000 !important;
+    background: #FFFF55 !important;
+    color: #FF5555 !important;
   }
 
   .hidden { display: none !important; }
@@ -76,7 +74,7 @@
 <body>
 
 <div id="container">
-  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Final Reveal">
+  <img id="bg-reveal" src="YOUR_IMAGE_URL_HERE.jpg" alt="Reveal">
   <canvas id="glitch-canvas"></canvas>
   <a href="#" id="click-me">CLICK ME</a>
 </div>
@@ -87,8 +85,16 @@
   const link = document.getElementById('click-me');
   const bg = document.getElementById('bg-reveal');
   
-  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#5555FF", "#FF55FF", "#55FFFF"];
-  const rareShoutouts = ["TERRY DAVIS", "GOD'S PROGRAMMER", "TEMPLE OS", "CIA GLOWS", "DIVINE INTELLECT"];
+  const colors = ["#FFFFFF", "#FF5555", "#55FF55", "#FFFF55", "#AAAAAA", "#55FFFF"];
+  
+  // Low-poly ASCII Sardine Variations
+  const sardines = [
+    "<'(((><", 
+    " <º))))><", 
+    "  ><(((º>", 
+    " ───O))><",
+    " <*)))><"
+  ];
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -99,30 +105,27 @@
   window.addEventListener('resize', resize);
   resize();
 
-  function drawChaos(x, y) {
-    for (let i = 0; i < 10; i++) {
-      setTimeout(() => {
-        // 1 in 50 chance for a Terry Davis shoutout
-        const isRare = Math.random() < 0.02; 
-        
-        ctx.font = isRare ? "bold 30px 'VT323'" : "24px 'VT323'";
-        ctx.fillStyle = isRare ? "#FFFFFF" : colors[Math.floor(Math.random() * colors.length)];
-        
-        const text = isRare 
-          ? rareShoutouts[Math.floor(Math.random() * rareShoutouts.length)] 
-          : "RANDOM";
-        
-        const offX = (Math.random() - 0.5) * 220;
-        const offY = (Math.random() - 0.5) * 220;
-        
-        ctx.fillText(text, x + offX, y + offY);
-        
-        // Draw some random system-style rectangles
-        if (Math.random() > 0.6) {
-          ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-          ctx.fillRect(x + offX, y + offY + 5, Math.random() * 80, 4);
-        }
-      }, i * 35);
+  function spawnSardine(x, y) {
+    const amount = 5; 
+    for (let i = 0; i < amount; i++) {
+      // Pick a random sardine shape and color
+      const fish = sardines[Math.floor(Math.random() * sardines.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      const offX = (Math.random() - 0.5) * 150;
+      const offY = (Math.random() - 0.5) * 150;
+      
+      ctx.font = `${Math.floor(Math.random() * 10 + 20)}px 'VT323'`;
+      ctx.fillStyle = color;
+      
+      // Draw the sardine
+      ctx.fillText(fish, x + offX, y + offY);
+      
+      // Rare Terry Davis Shoutout (1 in 30 fish)
+      if (Math.random() < 0.03) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText("TERRY DAVIS", x + offX, y + offY - 20);
+      }
     }
   }
 
@@ -135,29 +138,29 @@
     const centerY = rect.top + rect.height / 2;
     const dist = Math.hypot(clientX - centerX, clientY - centerY);
 
-    // 15% chance to stay put
-    const isLucky = Math.random() > 0.85;
+    const isLucky = Math.random() > 0.88; // ~12% chance to be catchable
 
-    if (dist < 130) {
+    if (dist < 120) {
       if (!isLucky) {
         link.classList.remove('catchable');
-        drawChaos(clientX, clientY);
+        spawnSardine(clientX, clientY);
+        
         const newX = Math.random() * (window.innerWidth - rect.width - 100) + 50;
         const newY = Math.random() * (window.innerHeight - rect.height - 100) + 50;
+        
         link.style.left = `${newX}px`;
         link.style.top = `${newY}px`;
         link.style.transform = 'none';
+        
         if (e.cancelable) e.preventDefault();
       } else {
-        // The button "gives up" - visual cue for the user
         link.classList.add('catchable');
       }
     }
   }
 
-  function revealBackground(e) {
+  function reveal(e) {
     e.preventDefault();
-    // Only allow reveal if the button is currently "catchable"
     if (link.classList.contains('catchable')) {
       canvas.style.display = 'none';
       link.classList.add('hidden');
@@ -167,7 +170,7 @@
 
   document.addEventListener('mousemove', handleInteraction);
   link.addEventListener('touchstart', handleInteraction, {passive: false});
-  link.addEventListener('click', revealBackground);
+  link.addEventListener('click', reveal);
 </script>
 </body>
 </html>
